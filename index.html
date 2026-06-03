@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VIP Checklist — Operacional</title>
+<style>
+  /* Fontes do sistema — funciona offline em qualquer computador */
+  @import url('data:text/css,');
+</style>
+<style>
+  :root {
+    --bg: #0F0E17;
+    --surface: #16151F;
+    --surface2: #1E1C2A;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.12);
+    --text: #F0EEF8;
+    --text2: #8E8BA8;
+    --text3: #5A5775;
+    --accent: #7B6EF6;
+    --accent-dim: rgba(123,110,246,0.15);
+    --accent-glow: rgba(123,110,246,0.3);
+    --amber: #F0A832;
+    --amber-dim: rgba(240,168,50,0.12);
+    --coral: #E8614D;
+    --coral-dim: rgba(232,97,77,0.12);
+    --green: #4DB87A;
+    --green-dim: rgba(77,184,122,0.12);
+    --radius: 14px;
+    --radius-sm: 8px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0;
+    overflow-x: hidden;
+  }
+
+  /* Background texture */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 40% at 80% 10%, rgba(123,110,246,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 30% at 10% 80%, rgba(77,184,122,0.05) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .app { position: relative; z-index: 1; max-width: 900px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
+
+  /* ── LOGIN ── */
+  .login-screen {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+  }
+
+  .login-card {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 20px;
+    padding: 2.5rem;
+    width: 100%;
+    max-width: 380px;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(123,110,246,0.1);
+    animation: fadeUp 0.4s ease;
+  }
+
+  .login-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--accent-dim);
+    border: 1px solid rgba(123,110,246,0.25);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 11px;
+    font-family: 'Courier New', 'Lucida Console', monospace;
+    color: var(--accent);
+    letter-spacing: 0.08em;
+    margin-bottom: 1.5rem;
+  }
+
+  .login-card h1 {
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 6px;
+    letter-spacing: -0.3px;
+  }
+
+  .login-card p {
+    font-size: 14px;
+    color: var(--text2);
+    margin-bottom: 1.75rem;
+    line-height: 1.6;
+  }
+
+  .field-label {
+    font-size: 11px;
+    font-family: 'Courier New', 'Lucida Console', monospace;
+    color: var(--text3);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    display: block;
+  }
+
+  .login-input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    font-size: 14px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    margin-bottom: 14px;
+  }
+
+  .login-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-dim);
+  }
+
+  .login-input::placeholder { color: var(--text3); }
+
+  .btn-primary {
+    width: 100%;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 13px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.01em;
+  }
+
+  .btn-primary:hover { background: #6A5EE8; transform: translateY(-1px); box-shadow: 0 8px 24px var(--accent-glow); }
+  .btn-primary:active { transform: translateY(0); }
+
+  /* ── MAIN DASHBOARD ── */
+  .dashboard { display: none; }
+  .dashboard.active { display: block; animation: fadeUp 0.4s ease; }
+
+  .topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 2rem;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .topbar-left h1 {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: -0.3px;
+  }
+
+  .topbar-left p {
+    font-size: 13px;
+    color: var(--text2);
+    margin-top: 4px;
+    font-family: 'Courier New', 'Lucida Console', monospace;
+  }
+
+  .topbar-right { display: flex; align-items: center; gap: 10px; }
+
+  .user-chip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 20px;
+    padding: 6px 14px 6px 8px;
+    font-size: 13px;
+    color: var(--text);
+  }
+
+  .user-avatar {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--accent-dim);
+    border: 1px solid rgba(123,110,246,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--accent);
+    font-family: 'Courier New', 'Lucida Console', monospace;
+  }
+
+  .btn-ghost {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 6px 12px;
+    font-size: 12px;
+    color: var(--text2);
+    cursor: pointer;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    transition: all 0.2s;
+  }
+  .btn-ghost:hover { border-color: var(--border2); color: var(--text); }
+
+  /* ── META STRIP ── */
+  .meta-strip {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 10px;
+    margin-bottom: 1.75rem;
+  }
+
+  .meta-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .meta-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--accent);
+    opacity: 0.4;
+  }
+
+  .meta-card.green::before { background: var(--green); }
+
+  .meta-label {
+    font-size: 10px;
+    font-family: 'Courier New', 'Lucida Console', monospace;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 6px;
+  }
+
+  .meta-value {
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: -0.5px;
+  }
+
+  .meta-value.accent { color: var(--accent); }
+  .meta-value.green { color: var(--green); }
+
+  /* ── SECTIONS ── */
+  .sections {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 14px;
+    margin-bottom: 1.5rem;
+  }
+
+  .section-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    transition: border-color 0.2s;
+  }
+
+  .section-card:hover { border-color: var(--border2); }
+
+  .section-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 4px;
+  }
+
+  .section-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    flex-shrink: 0;
+  }
+
+  .section-title { font-size: 13px; font-weight: 600; color: var(--text); flex: 1; }
+  .section-count { font-size: 12px; color: var(--text3); font-family: 'Courier New', 'Lucida Console', monospace; }
+
+  .progress-track {
+    height: 3px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 10px;
+    margin: 10px 0 14px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 3px;
+    border-radius: 10px;
+    transition: width 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  }
+
+  .check-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s;
+    border-radius: 6px;
+  }
+
+  .check-item:last-child { border-bottom: none; }
+
+  .check-item:hover { background: rgba(255,255,255,0.02); padding-left: 4px; padding-right: 4px; }
+
+  .custom-cb {
+    width: 17px;
+    height: 17px;
+    border-radius: 5px;
+    border: 1.5px solid var(--border2);
+    flex-shrink: 0;
+    margin-top: 1px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+    background: transparent;
+  }
+
+  .custom-cb.checked {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .custom-cb svg { display: none; }
+  .custom-cb.checked svg { display: block; }
+
+  .check-label {
+    font-size: 13px;
+    color: var(--text2);
+    line-height: 1.5;
+    transition: all 0.2s;
+  }
+
+  .check-item.done .check-label {
+    color: var(--text3);
+    text-decoration: line-through;
+  }
+
+  /* ── EXPORT BOX ── */
+  .export-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    display: flex;
+    gap: 2rem;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .export-left { flex: 1; min-width: 220px; }
+
+  .export-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+
+  .export-desc {
+    font-size: 13px;
+    color: var(--text2);
+    line-height: 1.6;
+    margin-bottom: 1rem;
+  }
+
+  .btn-export {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 11px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.01em;
+  }
+
+  .btn-export:hover { background: #6A5EE8; transform: translateY(-1px); box-shadow: 0 8px 24px var(--accent-glow); }
+  .btn-export:active { transform: translateY(0); }
+
+  .copy-ok {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    background: var(--green-dim);
+    border: 1px solid rgba(77,184,122,0.2);
+    border-radius: var(--radius-sm);
+    padding: 10px 16px;
+    font-size: 13px;
+    color: var(--green);
+    margin-top: 10px;
+    animation: fadeUp 0.3s ease;
+  }
+
+  .copy-ok.show { display: flex; }
+
+  .steps-list { flex: 1; min-width: 200px; }
+
+  .steps-title {
+    font-size: 10px;
+    font-family: 'Courier New', 'Lucida Console', monospace;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 10px;
+  }
+
+  .step-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+
+  .step-num {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--accent-dim);
+    border: 1px solid rgba(123,110,246,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--accent);
+    font-family: 'Courier New', 'Lucida Console', monospace;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .step-text { font-size: 12.5px; color: var(--text2); line-height: 1.5; }
+  .step-text strong { color: var(--text); font-weight: 500; }
+
+  .bottom-row { display: flex; gap: 8px; }
+
+  /* ── COLOR VARIANTS ── */
+  .v-purple .section-icon { background: rgba(123,110,246,0.12); color: var(--accent); }
+  .v-purple .progress-fill { background: var(--accent); }
+  .v-purple .custom-cb.checked { background: var(--accent); border-color: var(--accent); }
+
+  .v-amber .section-icon { background: rgba(240,168,50,0.12); color: var(--amber); }
+  .v-amber .progress-fill { background: var(--amber); }
+  .v-amber .custom-cb.checked { background: var(--amber); border-color: var(--amber); }
+
+  .v-coral .section-icon { background: rgba(232,97,77,0.12); color: var(--coral); }
+  .v-coral .progress-fill { background: var(--coral); }
+  .v-coral .custom-cb.checked { background: var(--coral); border-color: var(--coral); }
+
+  .v-green .section-icon { background: rgba(77,184,122,0.12); color: var(--green); }
+  .v-green .progress-fill { background: var(--green); }
+  .v-green .custom-cb.checked { background: var(--green); border-color: var(--green); }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .section-card { animation: fadeUp 0.4s ease both; }
+  .section-card:nth-child(1) { animation-delay: 0.05s; }
+  .section-card:nth-child(2) { animation-delay: 0.1s; }
+  .section-card:nth-child(3) { animation-delay: 0.15s; }
+  .section-card:nth-child(4) { animation-delay: 0.2s; }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 10px; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-screen" id="login-screen">
+  <div class="login-card">
+    <div class="login-badge">● VIP OPERACIONAL</div>
+    <h1>Checklist diário</h1>
+    <p>Digite seu nome para acessar o checklist do dia e registrar sua produção.</p>
+    <label class="field-label" for="input-name">Seu nome</label>
+    <input class="login-input" type="text" id="input-name" placeholder="Ex: Ana Lima" maxlength="40" autocomplete="off">
+    <button class="btn-primary" onclick="doLogin()">Entrar →</button>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="app">
+  <div class="dashboard" id="dashboard">
+
+    <div class="topbar">
+      <div class="topbar-left">
+        <h1>Checklist VIP</h1>
+        <p id="sub-date"></p>
+      </div>
+      <div class="topbar-right">
+        <div class="user-chip">
+          <div class="user-avatar" id="user-initials"></div>
+          <span id="user-name-tag"></span>
+        </div>
+        <button class="btn-ghost" onclick="doLogout()">Sair</button>
+      </div>
+    </div>
+
+    <div class="meta-strip">
+      <div class="meta-card">
+        <div class="meta-label">Meta mensal</div>
+        <div class="meta-value accent">50M</div>
+      </div>
+      <div class="meta-card">
+        <div class="meta-label">Meta diária</div>
+        <div class="meta-value accent">1,6M</div>
+      </div>
+      <div class="meta-card green">
+        <div class="meta-label">Concluído</div>
+        <div class="meta-value green" id="pct-val">0%</div>
+      </div>
+      <div class="meta-card">
+        <div class="meta-label">Itens feitos</div>
+        <div class="meta-value" id="count-val">0 / 20</div>
+      </div>
+    </div>
+
+    <div class="sections" id="sections-container"></div>
+
+    <div class="export-box">
+      <div class="export-left">
+        <div class="export-title">📋 Exportar para a planilha</div>
+        <div class="export-desc">Clique para copiar sua produção. Depois abra a planilha no SharePoint e cole na aba <strong>Registro Diário</strong>.</div>
+        <button class="btn-export" onclick="exportData()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          Copiar minha produção
+        </button>
+        <div class="copy-ok" id="copy-ok">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          Copiado! Abra a planilha e cole com Ctrl+V.
+        </div>
+      </div>
+      <div class="steps-list">
+        <div class="steps-title">Como fazer</div>
+        <div class="step-row"><div class="step-num">1</div><div class="step-text">Clique em <strong>Copiar minha produção</strong></div></div>
+        <div class="step-row"><div class="step-num">2</div><div class="step-text">Abra o <strong>VIP_Checklist_Equipe.xlsx</strong> no SharePoint</div></div>
+        <div class="step-row"><div class="step-num">3</div><div class="step-text">Aba <strong>Registro Diário</strong> → primeira linha vazia</div></div>
+        <div class="step-row"><div class="step-num">4</div><div class="step-text">Cole com <strong>Ctrl+V</strong></div></div>
+      </div>
+    </div>
+
+    <div class="bottom-row">
+      <button class="btn-ghost" onclick="resetAll()">↺ Limpar checklist</button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const SECTIONS = [
+  { id:'daily', variant:'v-purple', icon:'☑', title:'Atividades diárias', items:[
+    'Analisar todos os clientes ativos do dia anterior',
+    'Verificar contatos realizados com o suporte',
+    'Entrar em contato com clientes que acionaram o suporte',
+    'Identificar clientes com grandes ganhos e saques relevantes',
+    'Identificar clientes com grandes perdas e realizar contato consultivo',
+    'Comunicar cashback disponível e benefícios elegíveis',
+    'Monitorar clientes bem posicionados em torneios',
+    'Informar posição atual, premiação potencial e volume necessário',
+    'Acompanhar novos VIPs diários',
+    'Controlar a quantidade de novos VIPs conquistados'
+  ]},
+  { id:'nodeposit', variant:'v-amber', icon:'⚠', title:'Clientes sem depósito', items:[
+    'Monitorar clientes com 3 dias sem depósito',
+    'Verificar se continuam jogando com saldo existente',
+    'Identificar clientes que apenas realizam saques',
+    'Entender o motivo do comportamento e definir plano de ação'
+  ]},
+  { id:'inactive', variant:'v-coral', icon:'○', title:'Clientes inativos', items:[
+    'Identificar motivo da inatividade',
+    'Acionar suporte quando necessário',
+    'Mapear oportunidades de reativação'
+  ]},
+  { id:'reactivation', variant:'v-green', icon:'↻', title:'Recuperação e reativação', items:[
+    'Entrar em contato com clientes elegíveis',
+    'Informar benefícios perdidos',
+    'Oferecer segunda oportunidade de resgate de benefícios'
+  ]}
+];
+
+const TOTAL = SECTIONS.reduce((a,s) => a + s.items.length, 0);
+let analyst = '';
+let state = {};
+
+function initials(name) {
+  return name.trim().split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+}
+
+function doLogin() {
+  const val = document.getElementById('input-name').value.trim();
+  if (!val) { document.getElementById('input-name').focus(); return; }
+  analyst = val;
+  document.getElementById('user-name-tag').textContent = val;
+  document.getElementById('user-initials').textContent = initials(val);
+  const now = new Date();
+  document.getElementById('sub-date').textContent = now.toLocaleDateString('pt-BR', { weekday:'long', day:'2-digit', month:'long', year:'numeric' });
+  document.getElementById('login-screen').style.display = 'none';
+  const dash = document.getElementById('dashboard');
+  dash.classList.add('active');
+  renderSections();
+}
+
+document.getElementById('input-name').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+
+function doLogout() {
+  analyst = ''; state = {};
+  document.getElementById('input-name').value = '';
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('dashboard').classList.remove('active');
+  document.getElementById('copy-ok').classList.remove('show');
+}
+
+function checked(sId, i) { return !!(state[sId] && state[sId][i]); }
+
+function toggle(sId, i) {
+  if (!state[sId]) state[sId] = {};
+  state[sId][i] = !state[sId][i];
+  const cb = document.getElementById(`cb-${sId}-${i}`);
+  const row = document.getElementById(`row-${sId}-${i}`);
+  if (cb) cb.classList.toggle('checked', state[sId][i]);
+  if (row) row.classList.toggle('done', state[sId][i]);
+  updateCounts();
+}
+
+function resetAll() {
+  state = {};
+  renderSections();
+  document.getElementById('copy-ok').classList.remove('show');
+}
+
+function renderSections() {
+  const container = document.getElementById('sections-container');
+  container.innerHTML = '';
+  SECTIONS.forEach(sec => {
+    const done = sec.items.filter((_,i) => checked(sec.id, i)).length;
+    const pct = Math.round(done / sec.items.length * 100);
+    const card = document.createElement('div');
+    card.className = `section-card ${sec.variant}`;
+    card.innerHTML = `
+      <div class="section-head">
+        <div class="section-icon">${sec.icon}</div>
+        <div class="section-title">${sec.title}</div>
+        <div class="section-count" id="cnt-${sec.id}">${done}/${sec.items.length}</div>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="pb-${sec.id}" style="width:${pct}%"></div>
+      </div>
+      <div>
+        ${sec.items.map((item, i) => `
+          <div class="check-item${checked(sec.id,i)?' done':''}" id="row-${sec.id}-${i}" onclick="toggle('${sec.id}',${i})">
+            <div class="custom-cb${checked(sec.id,i)?' checked':''}" id="cb-${sec.id}-${i}">
+              <svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="2 6 5 9 10 3"/>
+              </svg>
+            </div>
+            <span class="check-label">${item}</span>
+          </div>
+        `).join('')}
+      </div>
+    `;
+    container.appendChild(card);
+  });
+  updateCounts();
+}
+
+function updateCounts() {
+  let totalDone = 0;
+  SECTIONS.forEach(sec => {
+    const done = sec.items.filter((_,i) => checked(sec.id,i)).length;
+    totalDone += done;
+    const pct = Math.round(done / sec.items.length * 100);
+    const pb = document.getElementById('pb-' + sec.id);
+    const cnt = document.getElementById('cnt-' + sec.id);
+    if (pb) pb.style.width = pct + '%';
+    if (cnt) cnt.textContent = done + '/' + sec.items.length;
+  });
+  const gPct = Math.round(totalDone / TOTAL * 100);
+  document.getElementById('pct-val').textContent = gPct + '%';
+  document.getElementById('count-val').textContent = totalDone + ' / ' + TOTAL;
+}
+
+function exportData() {
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric' });
+  const timeStr = now.toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
+  const rows = [];
+  SECTIONS.forEach(sec => {
+    const done = sec.items.filter((_,i) => checked(sec.id,i)).length;
+    const catPct = Math.round(done / sec.items.length * 100) + '%';
+    sec.items.forEach((item, i) => {
+      rows.push([dateStr, analyst, sec.title, item, checked(sec.id,i) ? 'Sim' : 'Não', catPct, timeStr].join('\t'));
+    });
+  });
+  const tsv = rows.join('\n');
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(tsv).then(showOk).catch(() => fallback(tsv));
+  } else { fallback(tsv); }
+}
+
+function fallback(text) {
+  const ta = document.createElement('textarea');
+  ta.value = text; ta.style.cssText = 'position:fixed;opacity:0;';
+  document.body.appendChild(ta); ta.select();
+  try { document.execCommand('copy'); showOk(); } catch(e) { alert('Não foi possível copiar. Tente novamente.'); }
+  document.body.removeChild(ta);
+}
+
+function showOk() {
+  const el = document.getElementById('copy-ok');
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 5000);
+}
+</script>
+</body>
+</html>
